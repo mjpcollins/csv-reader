@@ -25,10 +25,10 @@ class TestParser(TestCase):
         self.parser.file_lines = ['"DateTime","Baro"', '"2016-10-09 00:00:00","5\r\n4",21.93,21,22.8\r\n','"2016-10-09 00:00:00","5\r\n4",21.93,21,22.8\r\n','"2016-10-09 00:00:00","5\r\n4",21.93,21,22.8\r\n','"2016-10-09 00:00:00","5\r\n4",21.93,21,22.8\r\n']
         expected = [['2016-10-09 00:00:00', '5\r\n4', '21.93', '21', '22.8'], ['2016-10-09 00:00:00', '5\r\n4', '21.93', '21', '22.8'], ['2016-10-09 00:00:00', '5\r\n4', '21.93', '21', '22.8'], ['2016-10-09 00:00:00', '5\r\n4', '21.93', '21', '22.8']]
         self.assertEqual(expected, self.parser._parse_lines())
-        self.assertEqual(['DateTime', 'Baro'], self.parser._header)
+        self.assertEqual(['DateTime', 'Baro', 'header_3', 'header_4', 'header_5'], self.parser._header)
 
     def test_identify_data_type(self):
-        self.assertEqual(None, self.parser._identify_column_type([]))
+        self.assertEqual(str, self.parser._identify_column_type([]))
         self.assertEqual(float, self.parser._identify_column_type([1021.9, 1019.9, 1015.8]))
         self.assertEqual(float, self.parser._identify_column_type([1021, 1019.9, 1015]))
         self.assertEqual(float, self.parser._identify_column_type(["1021", "1019.9", "1015"]))
@@ -37,8 +37,8 @@ class TestParser(TestCase):
 
     def test_check_datetime(self):
         self.assertEqual(datetime.datetime, self.parser._check_datetime("2016-10-09 00:00:00"))
-        self.assertEqual(datetime.time, self.parser._check_datetime("00:00:00"))
-        self.assertEqual(datetime.date, self.parser._check_datetime("2016-10-09"))
+        self.assertEqual(datetime.datetime, self.parser._check_datetime("00:00:00"))
+        self.assertEqual(datetime.datetime, self.parser._check_datetime("2016-10-09"))
         self.assertEqual(str, self.parser._check_datetime("101a9.9"))
 
     def test_parse_column(self):
@@ -50,10 +50,8 @@ class TestParser(TestCase):
                          self.parser._parse_column([1021, "101a9.9", 1015]))
         self.assertEqual([datetime.datetime(year=2016, month=10, day=9), datetime.datetime(year=2016, month=10, day=10), datetime.datetime(year=2016, month=10, day=11)],
                          self.parser._parse_column(["2016-10-09 00:00:00", "2016-10-10 00:00:00", "2016-10-11 00:00:00"]))
-        self.assertEqual([datetime.date(year=2016, month=10, day=9), datetime.date(year=2016, month=10, day=10), datetime.date(year=2016, month=10, day=11)],
+        self.assertEqual([datetime.datetime(year=2016, month=10, day=9), datetime.datetime(year=2016, month=10, day=10), datetime.datetime(year=2016, month=10, day=11)],
                          self.parser._parse_column(["2016-10-09", "2016-10-10", "2016-10-11"]))
-        self.assertEqual([datetime.time(hour=1, minute=10, second=9), datetime.time(hour=1, minute=45, second=9), datetime.time(hour=13, minute=10, second=9)],
-                         self.parser._parse_column(["01:10:09", "01:45:09", "13:10:09"]))
 
     def test_parse_columns(self):
         self.parser._rows = [['2016-10-09 00:00:00', '1021.9'],
@@ -80,3 +78,6 @@ class TestParser(TestCase):
         outside_temp = CSVParser('tests/data/outside-temperature-1617.csv').read_csv()
         rainfall = CSVParser('tests/data/rainfall-1617.csv').read_csv()
         baro = CSVParser('tests/data/barometer-1617.csv').read_csv()
+
+    def test_bad_data_no_errors(self):
+        broken = CSVParser('tests/data/broken-baro.csv').read_csv()

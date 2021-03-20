@@ -42,5 +42,3 @@ class TestParser(TestCase):
                                    'standard_deviation': 9.856}}
         actual_stats = self.baro.describe_data()
         self.assertEqual(expected_stats, actual_stats)
-        d = self.outside_temp.describe_data()
-        print()

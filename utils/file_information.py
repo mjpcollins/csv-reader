@@ -1,11 +1,11 @@
 import math
-from utils.csv_parser import CSVParser
+from utils.csv_parser import read_csv
 
 
 class FileInformation:
 
     def __init__(self, filename):
-        self.data = CSVParser(filename).read_csv()
+        self.data = read_csv(filename)
 
     def describe_data(self):
         descriptions = {}
@@ -31,3 +31,7 @@ class FileInformation:
                  'variance': round(col_variance, 3),
                  'standard_deviation': round(col_std, 3)}
         return stats
+
+
+def get_stats(filename):
+    return FileInformation(filename).describe_data()
